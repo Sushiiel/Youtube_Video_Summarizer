@@ -44,11 +44,14 @@ Users can paste a YouTube link into a **Streamlit UI**, which triggers an **n8n 
 4. Activate the workflow (toggle **Active**).  
 
 ---
-
-### 2. Run the Streamlit app
+### 2. Deployed
+- [Deployed](https://youtube-video-summarizer-z4nb.onrender.com)
+- Visit to test the application
+### 3. Run the Streamlit app
 
 Install dependencies:
 
 ```bash
 pip install streamlit requests
 streamlit run streamlit_client.py
+
