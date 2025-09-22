@@ -42,6 +42,7 @@ Users can paste a YouTube link into a **Streamlit UI**, which triggers an **n8n 
    - **Summarization node** (LLM)  
    - **Respond node** (sends summary back to caller).  
 4. Activate the workflow (toggle **Active**).  
+   ![WorkFlow](/Image1.png)
 
 ---
 ### 2. Deployed
