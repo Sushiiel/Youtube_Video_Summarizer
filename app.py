@@ -43,7 +43,8 @@ def chat_with_gemini(user_message: str) -> str:
         return "❌ Gemini API is not configured."
     
     try:
-        model = genai.GenerativeModel('gemini-pro')
+        # Use the stable Gemini 2.5 Flash model
+        model = genai.GenerativeModel('gemini-2.5-flash')
         context = ""
         
         if app.summary_data:
