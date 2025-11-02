@@ -545,7 +545,13 @@ HTML_TEMPLATE = """
                     body: JSON.stringify({ url, format })
                 });
                 
-                const data = await response.json();
+                let data;
+                try {
+                    data = await response.json();
+                } catch (parseError) {
+                    outputDiv.innerHTML = `<div class="error">❌ Server error: Invalid response format. ${response.statusText}</div>`;
+                    return;
+                }
                 
                 if (data.success) {
                     summaryCount++;
@@ -828,9 +834,30 @@ def summarize():
             "timestamp": datetime.now().isoformat()
         }
         
+        print(f"Sending request to: {WEBHOOK_URL}")
+        print(f"Payload: {payload}")
+        
         response = requests.post(WEBHOOK_URL, json=payload, timeout=90)
+        
+        print(f"Response status: {response.status_code}")
+        print(f"Response content type: {response.headers.get('content-type')}")
+        
+        # Check if response is HTML (error)
+        if 'text/html' in response.headers.get('content-type', ''):
+            return jsonify({
+                'success': False, 
+                'error': f'Webhook error (Status {response.status_code}): The n8n webhook is not responding properly. Please check if the workflow is active.'
+            })
+        
         response.raise_for_status()
-        response_data = response.json()
+        
+        try:
+            response_data = response.json()
+        except ValueError:
+            return jsonify({
+                'success': False,
+                'error': f'Invalid JSON response from webhook. Response: {response.text[:200]}'
+            })
         
         app.summary_data = response_data
         
@@ -845,9 +872,15 @@ def summarize():
         })
     
     except requests.exceptions.Timeout:
-        return jsonify({'success': False, 'error': 'Request timed out'})
+        return jsonify({'success': False, 'error': 'Request timed out (90s). The video might be too long or the webhook is slow.'})
+    except requests.exceptions.ConnectionError:
+        return jsonify({'success': False, 'error': 'Connection failed. Check if the webhook URL is correct and the n8n service is running.'})
+    except requests.exceptions.RequestException as e:
+        return jsonify({'success': False, 'error': f'Request error: {str(e)}'})
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+        import traceback
+        print(f"Error: {traceback.format_exc()}")
+        return jsonify({'success': False, 'error': f'Server error: {str(e)}'})
 
 @app.route('/api/chat', methods=['POST'])
 def chat():
