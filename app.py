@@ -228,22 +228,61 @@ HTML_TEMPLATE = """
             padding: 2rem;
             border-radius: 8px;
             margin-top: 2rem;
-            max-height: 500px;
+            max-height: 600px;
             overflow-y: auto;
+            word-wrap: break-word;
+            white-space: normal;
         }
         
         .output-box h4 {
             color: #ff8c00;
             margin-bottom: 1rem;
+            font-size: 1.1rem;
         }
         
         .output-box pre {
             background: white;
-            padding: 1rem;
+            padding: 1.5rem;
             border-radius: 6px;
             border: 1px solid #ddd;
-            overflow-x: auto;
-            font-size: 0.9rem;
+            overflow-x: visible;
+            overflow-y: auto;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 500px;
+        }
+        
+        .summary-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            margin-bottom: 1rem;
+            line-height: 1.8;
+        }
+        
+        .summary-section h5 {
+            color: #ff8c00;
+            margin-bottom: 0.8rem;
+            font-size: 1rem;
+        }
+        
+        .summary-section p {
+            color: #333;
+            margin-bottom: 0.8rem;
+            text-align: justify;
+        }
+        
+        .summary-list {
+            color: #333;
+            margin-left: 1.5rem;
+            line-height: 1.8;
+        }
+        
+        .summary-list li {
+            margin-bottom: 0.8rem;
         }
         
         .success {
@@ -468,6 +507,17 @@ HTML_TEMPLATE = """
         let summaryCount = 0;
         let messageCount = 0;
         
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+        
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -501,7 +551,8 @@ HTML_TEMPLATE = """
                     summaryCount++;
                     document.getElementById('stat-summaries').textContent = summaryCount;
                     
-                    outputDiv.innerHTML = `
+                    const summary = data.summary;
+                    let summaryHTML = `
                         <div class="success">✅ Summary generated successfully!</div>
                         <div class="stats">
                             <div class="stat-box">
@@ -514,10 +565,45 @@ HTML_TEMPLATE = """
                             </div>
                         </div>
                         <div class="output-box">
-                            <h4>Summary Output</h4>
-                            <pre>${JSON.stringify(data.summary, null, 2)}</pre>
-                        </div>
+                            <h4>📝 Summary Output</h4>
                     `;
+                    
+                    if (summary.title) {
+                        summaryHTML += `<div class="summary-section">
+                            <h5>📌 Title</h5>
+                            <p>${escapeHtml(summary.title)}</p>
+                        </div>`;
+                    }
+                    
+                    if (summary.description) {
+                        summaryHTML += `<div class="summary-section">
+                            <h5>📖 Description</h5>
+                            <p>${escapeHtml(summary.description).substring(0, 300)}...</p>
+                        </div>`;
+                    }
+                    
+                    if (summary.summary) {
+                        summaryHTML += `<div class="summary-section">
+                            <h5>✨ Key Summary</h5>
+                            <p>${escapeHtml(summary.summary)}</p>
+                        </div>`;
+                    }
+                    
+                    if (summary.topics && summary.topics.length > 0) {
+                        summaryHTML += `<div class="summary-section">
+                            <h5>🎯 Topics Covered</h5>
+                            <ul class="summary-list">
+                                ${summary.topics.map(topic => `<li>${escapeHtml(topic)}</li>`).join('')}
+                            </ul>
+                        </div>`;
+                    }
+                    
+                    summaryHTML += `<div class="summary-section">
+                        <h5>🔗 Full Data</h5>
+                        <pre>${JSON.stringify(summary, null, 2)}</pre>
+                    </div></div>`;
+                    
+                    outputDiv.innerHTML = summaryHTML;
                 } else {
                     outputDiv.innerHTML = `<div class="error">❌ ${data.error}</div>`;
                 }
