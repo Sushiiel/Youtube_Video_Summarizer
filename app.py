@@ -552,6 +552,7 @@ HTML_TEMPLATE = """
                     document.getElementById('stat-summaries').textContent = summaryCount;
                     
                     const summary = data.summary;
+                    const format = data.format;
                     let summaryHTML = `
                         <div class="success">✅ Summary generated successfully!</div>
                         <div class="stats">
@@ -565,43 +566,116 @@ HTML_TEMPLATE = """
                             </div>
                         </div>
                         <div class="output-box">
-                            <h4>📝 Summary Output</h4>
                     `;
                     
-                    if (summary.title) {
-                        summaryHTML += `<div class="summary-section">
-                            <h5>📌 Title</h5>
-                            <p>${escapeHtml(summary.title)}</p>
-                        </div>`;
+                    if (format === "Summary") {
+                        summaryHTML += `
+                            <h4>📝 Video Summary</h4>
+                            <div class="summary-section">
+                                <h5>📌 Title</h5>
+                                <p>${escapeHtml(summary.title)}</p>
+                            </div>
+                            <div class="summary-section">
+                                <h5>📖 Description</h5>
+                                <p>${escapeHtml(summary.description)}</p>
+                            </div>
+                            <div class="summary-section">
+                                <h5>✨ Summary</h5>
+                                <p>${escapeHtml(summary.summary)}</p>
+                            </div>
+                            ${summary.topics && summary.topics.length > 0 ? `
+                            <div class="summary-section">
+                                <h5>🎯 Topics</h5>
+                                <ul class="summary-list">
+                                    ${summary.topics.map(t => `<li>${escapeHtml(t)}</li>`).join('')}
+                                </ul>
+                            </div>
+                            ` : ''}
+                        `;
+                    } 
+                    else if (format === "Timestamps") {
+                        summaryHTML += `
+                            <h4>⏱️ Video Timestamps</h4>
+                            <div class="summary-section">
+                                <h5>📌 Title</h5>
+                                <p>${escapeHtml(summary.title)}</p>
+                            </div>
+                            <div class="summary-section">
+                                <h5>⏱️ Timeline</h5>
+                                <ul class="summary-list">
+                                    ${summary.timestamps.map(ts => `<li><strong>${ts.time}</strong> - ${escapeHtml(ts.description)}</li>`).join('')}
+                                </ul>
+                            </div>
+                            <div class="summary-section">
+                                <h5>📹 Duration</h5>
+                                <p>${summary.total_duration}</p>
+                            </div>
+                        `;
+                    }
+                    else if (format === "Key Points") {
+                        summaryHTML += `
+                            <h4>🔑 Key Points</h4>
+                            <div class="summary-section">
+                                <h5>📌 Title</h5>
+                                <p>${escapeHtml(summary.title)}</p>
+                            </div>
+                            <div class="summary-section">
+                                <h5>🔑 Main Points</h5>
+                                <ul class="summary-list">
+                                    ${summary.key_points.map(kp => `<li>${escapeHtml(kp)}</li>`).join('')}
+                                </ul>
+                            </div>
+                            ${summary.topics && summary.topics.length > 0 ? `
+                            <div class="summary-section">
+                                <h5>🎯 Topics Covered</h5>
+                                <ul class="summary-list">
+                                    ${summary.topics.map(t => `<li>${escapeHtml(t)}</li>`).join('')}
+                                </ul>
+                            </div>
+                            ` : ''}
+                        `;
+                    }
+                    else if (format === "Full Transcript") {
+                        summaryHTML += `
+                            <h4>📄 Full Transcript</h4>
+                            <div class="summary-section">
+                                <h5>📌 Title</h5>
+                                <p>${escapeHtml(summary.title)}</p>
+                            </div>
+                            <div class="summary-section">
+                                <h5>📹 Channel</h5>
+                                <p>${summary.channel}</p>
+                            </div>
+                            <div class="summary-section">
+                                <h5>📖 Full Description</h5>
+                                <p>${escapeHtml(summary.full_description)}</p>
+                            </div>
+                            <div class="summary-section">
+                                <h5>✨ Summary</h5>
+                                <p>${escapeHtml(summary.summary)}</p>
+                            </div>
+                            ${summary.topics && summary.topics.length > 0 ? `
+                            <div class="summary-section">
+                                <h5>🎯 Topics</h5>
+                                <ul class="summary-list">
+                                    ${summary.topics.map(t => `<li>${escapeHtml(t)}</li>`).join('')}
+                                </ul>
+                            </div>
+                            ` : ''}
+                            <div class="summary-section">
+                                <h5>🔗 Video URL</h5>
+                                <p><a href="${escapeHtml(summary.url)}" target="_blank" style="color: #ff8c00; text-decoration: none;">${escapeHtml(summary.url)}</a></p>
+                            </div>
+                        `;
                     }
                     
-                    if (summary.description) {
-                        summaryHTML += `<div class="summary-section">
-                            <h5>📖 Description</h5>
-                            <p>${escapeHtml(summary.description).substring(0, 300)}...</p>
-                        </div>`;
-                    }
-                    
-                    if (summary.summary) {
-                        summaryHTML += `<div class="summary-section">
-                            <h5>✨ Key Summary</h5>
-                            <p>${escapeHtml(summary.summary)}</p>
-                        </div>`;
-                    }
-                    
-                    if (summary.topics && summary.topics.length > 0) {
-                        summaryHTML += `<div class="summary-section">
-                            <h5>🎯 Topics Covered</h5>
-                            <ul class="summary-list">
-                                ${summary.topics.map(topic => `<li>${escapeHtml(topic)}</li>`).join('')}
-                            </ul>
-                        </div>`;
-                    }
-                    
-                    summaryHTML += `<div class="summary-section">
-                        <h5>🔗 Full Data</h5>
-                        <pre>${JSON.stringify(summary, null, 2)}</pre>
-                    </div></div>`;
+                    summaryHTML += `
+                            <div class="summary-section">
+                                <h5>📊 Raw Data</h5>
+                                <pre>${JSON.stringify(summary, null, 2)}</pre>
+                            </div>
+                        </div>
+                    `;
                     
                     outputDiv.innerHTML = summaryHTML;
                 } else {
@@ -675,6 +749,64 @@ HTML_TEMPLATE = """
 def home():
     return render_template_string(HTML_TEMPLATE)
 
+def format_summary_by_type(response_data, format_type):
+    """Format summary based on selected format type"""
+    if format_type == "Summary":
+        return {
+            'title': response_data.get('title', ''),
+            'description': response_data.get('description', '')[:500],
+            'summary': response_data.get('summary', ''),
+            'topics': response_data.get('topics', []),
+            'id': response_data.get('id', '')
+        }
+    
+    elif format_type == "Timestamps":
+        # Extract timestamps if available, or generate format
+        timestamps = response_data.get('timestamps', [])
+        if not timestamps:
+            timestamps = [
+                {"time": "0:00", "description": "Intro"},
+                {"time": "5:00", "description": "Main Content"},
+                {"time": "15:00", "description": "Conclusion"}
+            ]
+        return {
+            'title': response_data.get('title', ''),
+            'timestamps': timestamps,
+            'total_duration': response_data.get('duration', 'N/A')
+        }
+    
+    elif format_type == "Key Points":
+        description = response_data.get('description', '')
+        topics = response_data.get('topics', [])
+        
+        # Extract key points from description
+        key_points = []
+        if description:
+            sentences = description.split('.')
+            key_points = [s.strip() + '.' for s in sentences[:5] if s.strip()]
+        
+        if not key_points and topics:
+            key_points = topics
+        
+        return {
+            'title': response_data.get('title', ''),
+            'key_points': key_points if key_points else ["No key points extracted"],
+            'topics': topics
+        }
+    
+    elif format_type == "Full Transcript":
+        return {
+            'title': response_data.get('title', ''),
+            'full_description': response_data.get('description', ''),
+            'summary': response_data.get('summary', ''),
+            'topics': response_data.get('topics', []),
+            'channel': response_data.get('channel', 'N/A'),
+            'id': response_data.get('id', ''),
+            'url': response_data.get('youtubeUrl', '')
+        }
+    
+    return response_data
+
 @app.route('/api/summarize', methods=['POST'])
 def summarize():
     data = request.json
@@ -702,10 +834,14 @@ def summarize():
         
         app.summary_data = response_data
         
+        # Format the response based on selected format
+        formatted_data = format_summary_by_type(response_data, output_format)
+        
         return jsonify({
             'success': True,
             'video_id': video_id[:8] if video_id else 'unknown',
-            'summary': response_data
+            'format': output_format,
+            'summary': formatted_data
         })
     
     except requests.exceptions.Timeout:
