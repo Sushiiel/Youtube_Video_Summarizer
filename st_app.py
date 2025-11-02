@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import re
 
-WEBHOOK_URL="https://sushiiel33.app.n8n.cloud/webhook/ytube"
+WEBHOOK_URL="https://sushiiel7890.app.n8n.cloud/webhook/ytube"
 # https://sushiiel33.app.n8n.cloud/webhook/ytube
 #https://n8n-latest-1-u99c.onrender.com/webhook/ytube
 st.set_page_config(page_title="YouTube Summarizer",layout="centered")
